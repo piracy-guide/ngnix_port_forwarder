@@ -46,7 +46,7 @@ class CMD {
     try {
       print("Running $cmd");
       final x = await Process.run("sudo", ["bash", "-c", cmd]);
-      if (x.pid != 0) throw x.stderr;
+      if (x.exitCode != 0) throw x.stderr;
       print(x.stdout);
     } catch (e) {
       throw "Error $e on running $cmd";
