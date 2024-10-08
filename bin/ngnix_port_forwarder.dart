@@ -44,11 +44,10 @@ class CMD {
   CMD(this.cmd);
   Future run() async {
     try {
+      print("Running $cmd");
       final x = await Process.run("sudo", ["bash", "-c", cmd]);
-      print("exitCode: ${x.exitCode}");
-      print("pid: ${x.pid}");
-      print("stderr: ${x.stderr}");
-      print("stdout: ${x.stdout}");
+      if (x.pid != 0) throw x.stderr;
+      print(x.stdout);
     } catch (e) {
       throw "Error $e on running $cmd";
     }
