@@ -1,7 +1,9 @@
 import 'dart:io';
 
 void main(List<String> args) async {
-  print(args);
+  if (Platform.environment['USER'] != 'root') {
+    throw 'This script must be run with sudo.';
+  }
   if (args.length < 4) throw "Not enough args";
   final subdomain = args[0];
   final domain = args[2];
@@ -24,15 +26,17 @@ server {
 }
 """);
   final cmds = [
-    "sudo certbot --nginx -d $subdomain.$domain",
-    "sudo ln -s $path /etc/nginx/sites-enabled/",
-    "sudo certbot renew --dry-run",
-    "sudo nginx -t",
-    "sudo systemctl reload nginx",
+    "ln -s $path /etc/nginx/sites-enabled/",
+    "nginx -t",
+    "systemctl reload nginx",
+    "certbot --nginx -d $subdomain.$domain",
+    "certbot renew --dry-run",
   ];
   for (var e in cmds) {
     await CMD(e).run();
   }
+  print("Finished");
+  return;
 }
 
 class CMD {
@@ -40,7 +44,7 @@ class CMD {
   CMD(this.cmd);
   Future run() async {
     try {
-      final x = await Process.run("bash", ["-c", cmd]);
+      final x = await Process.run("sudo", ["bash", "-c", cmd]);
       print("exitCode: ${x.exitCode}");
       print("pid: ${x.pid}");
       print("stderr: ${x.stderr}");
